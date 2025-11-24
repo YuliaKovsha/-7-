@@ -1,5 +1,7 @@
 #include <iostream>
+#include <Windows.h>
 #include <stdexcept>
+#include <sstream> 
 using namespace std;
 
 // ------------------- 1. Варіант без специфікації -------------------
@@ -15,7 +17,7 @@ int wholePart1(int numerator, int denominator)
 int wholePart2(int numerator, int denominator) throw()
 {
     if (denominator == 0)
-        return 0; // не можемо кинути виключення — специфікація забороняє
+        return 0; // не можна кидати виключення
 
     return numerator / denominator;
 }
@@ -30,27 +32,33 @@ int wholePart3(int numerator, int denominator) throw(invalid_argument)
 }
 
 // ------------------- 4. Власні виключення -------------------
-class EmptyException {}; // порожній
 
-class FractionError {    // з полями
+// 4.1 Порожній клас
+class EmptyException {};
+
+// 4.2 Незалежний клас із полями
+class FractionError {
 public:
     int num, den;
     FractionError(int n, int d) : num(n), den(d) {}
 };
 
-class FractionException : public exception { // спадкоємець exception
+// 4.3 Спадкоємець від стандартного exception
+class FractionException : public exception {
     int num, den;
     string msg;
 public:
     FractionException(int n, int d) : num(n), den(d) {
-        msg = "Неправильний дріб: " + to_string(n) + "/" + to_string(d);
+        stringstream ss;
+        ss << "Неправильний дріб: " << n << "/" << d;
+        msg = ss.str();
     }
     const char* what() const noexcept override {
         return msg.c_str();
     }
 };
 
-// функція з власним виключенням
+// Функції з власними виключеннями
 int wholePart4(int numerator, int denominator) throw(EmptyException)
 {
     if (denominator == 0)
@@ -75,9 +83,12 @@ int wholePart6(int numerator, int denominator) throw(FractionException)
     return numerator / denominator;
 }
 
-// ------------------- ГОЛОВНА ФУНКЦІЯ -------------------
+// ------------------- Головна функція -------------------
 int main()
 {
+    SetConsoleCP(1251);
+    SetConsoleOutputCP(1251);
+
     int a, b;
 
     cout << "Введіть чисельник: ";
@@ -137,3 +148,4 @@ int main()
 
     return 0;
 }
+
